@@ -1,0 +1,40 @@
+# Research Report: Cloud Computing
+
+## 1. Introduction
+Cloud computing is the on-demand delivery of computing services—including servers, storage, databases, networking, software, and analytics—over the internet ("the cloud"). Instead of owning and maintaining physical data centers and servers, organizations can access technology services from cloud providers on an as-needed basis.
+
+## 2. Sub-Questions Investigated
+1. What is the fundamental definition and core concept of cloud computing?
+2. What are the primary service models (IaaS, PaaS, SaaS)?
+3. What are the key benefits and challenges of adopting cloud computing?
+4. Who are the major players in the cloud computing industry?
+
+## 3. Findings
+
+### 3.1 Definition and Core Concepts
+Cloud computing allows users to access computing resources via the internet. A central tenet is the "shared responsibility model," where the cloud provider manages the underlying infrastructure (hardware, physical security, and core software updates), while the customer is responsible for managing their data, applications, and access configurations (Source: Wikipedia).
+
+### 3.2 Service Models
+Cloud services are generally categorized into three main models:
+*   **Infrastructure as a Service (IaaS):** Provides fundamental computing resources like virtual servers, storage, and networking. Users manage the operating systems and applications.
+*   **Platform as a Service (PaaS):** Provides a framework for developers to build, test, and deploy applications without worrying about the underlying infrastructure.
+*   **Software as a Service (SaaS):** Delivers fully functional software applications over the internet, usually via a web browser (e.g., email, CRM tools).
+
+### 3.3 Benefits and Challenges
+*   **Benefits:** Scalability (adjusting resources based on demand), cost-efficiency (pay-as-you-go models), and accessibility (access from anywhere with an internet connection).
+*   **Challenges:** Security and data privacy concerns, potential for vendor lock-in, and the complexity of managing multi-cloud or hybrid environments.
+
+### 3.4 Major Providers
+The cloud computing market is dominated by several large-scale providers offering a wide array of services, including AI, data analytics, and infrastructure management. Key players include:
+*   **Amazon Web Services (AWS)**
+*   **Google Cloud**
+*   **Microsoft Azure**
+
+## 4. Conclusion
+Cloud computing has transformed how businesses and individuals consume technology by shifting from capital-intensive hardware ownership to flexible, service-based consumption. While it offers significant advantages in agility and cost, it requires careful management of security and configuration under the shared responsibility model.
+
+---
+*Sources:*
+*   *Wikipedia: Cloud Computing*
+*   *Amazon Web Services (AWS) Official Site*
+*   *Google Cloud Official Site*
