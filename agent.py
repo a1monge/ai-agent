@@ -88,6 +88,16 @@ def run(topic: str):
         print(f"  • {gap}")
     print(f"\nQuality: {report.quality_score} | Eval Overall: {scores['overall']}")
     print(f"Saved to: {filename}")
+    
+    return {
+        "topic": report.topic,
+        "summary": report.summary,
+        "key_insights": report.key_insights,
+        "gaps": report.gaps,
+        "quality_score": report.quality_score,
+        "eval_scores": scores,
+        "filename": filename
+    }
 
 if __name__ == "__main__":
     topic = input("Enter a research topic: ")
