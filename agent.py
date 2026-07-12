@@ -1,48 +1,92 @@
 import os
+import json
 from dotenv import load_dotenv
 from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.tools import tool
-from langgraph.prebuilt import create_react_agent
-from tools import search_web, save_report
-from prompts import AGENT_SYSTEM_PROMPT
+from agents.planner import run_planner
+from agents.researcher import run_researcher
+from agents.synthesizer import run_synthesizer
+from eval import evaluate_report
+from memory import save_to_memory, get_relevant_memory
 
 load_dotenv()
 
-def create_agent():
-    llm = ChatGoogleGenerativeAI(
+def get_llm():
+    return ChatGoogleGenerativeAI(
         model="gemini-3.1-flash-lite",
         temperature=0.3
     )
 
-    tools = [search_web, save_report]
+def save_report(report, scores: dict) -> str:
+    from datetime import datetime
+    filename = f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    output = {
+        "topic": report.topic,
+        "summary": report.summary,
+        "key_insights": report.key_insights,
+        "gaps": report.gaps,
+        "quality_score": report.quality_score,
+        "eval_scores": scores,
+        "findings": [
+            {
+                "question": f.question,
+                "answer": f.answer,
+                "sources": f.sources,
+                "confidence": f.confidence
+            }
+            for f in report.findings
+        ],
+        "timestamp": report.timestamp
+    }
+    with open(filename, "w") as f:
+        json.dump(output, f, indent=2)
+    return filename
 
-    agent = create_react_agent(llm, tools)
+def run(topic: str):
+    print(f"\n🚀 Starting research: {topic}")
+    print("=" * 60)
 
-    return agent
+    llm = get_llm()
 
-def run_agent(topic: str):
-    print(f"\nResearching: {topic}\n")
-    print("=" * 50)
-
-    agent = create_agent()
-
-    result = agent.invoke({
-        "messages": [
-            {"role": "system", "content": AGENT_SYSTEM_PROMPT},
-            {"role": "user", "content": f"Research this topic thoroughly: {topic}"}
-        ]
-    })
-
-    print("\n" + "=" * 50)
-    print("FINAL REPORT:")
-    final = result["messages"][-1].content
-    if isinstance(final, list):
-        for block in final:
-            if isinstance(block, dict) and block.get("type") == "text":
-                print(block["text"])
+    # Check memory for prior context
+    prior_context = get_relevant_memory(topic)
+    if prior_context:
+        print(f"\n💾 Found relevant prior research")
+        topic_with_context = f"{topic}\n\nContext from prior research:\n{prior_context}"
     else:
-        print(final)
+        topic_with_context = topic
+
+    # Step 1 — Planner breaks topic into subtasks
+    tasks = run_planner(topic_with_context, llm)
+
+    # Step 2 — Researchers run in sequence
+    findings = []
+    for task in tasks:
+        finding = run_researcher(task, llm)
+        findings.append(finding)
+
+    # Step 3 — Synthesizer combines findings
+    report = run_synthesizer(topic, findings, llm)
+
+    # Step 4 — Evaluator scores the report
+    scores = evaluate_report(report, llm)
+
+    # Step 5 — Save report and update memory
+    filename = save_report(report, scores)
+    save_to_memory(report)
+
+    print(f"\n{'=' * 60}")
+    print(f"📄 FINAL REPORT: {topic}")
+    print(f"{'=' * 60}")
+    print(f"\nSummary:\n{report.summary}")
+    print(f"\nKey Insights:")
+    for insight in report.key_insights:
+        print(f"  • {insight}")
+    print(f"\nGaps:")
+    for gap in report.gaps:
+        print(f"  • {gap}")
+    print(f"\nQuality: {report.quality_score} | Eval Overall: {scores['overall']}")
+    print(f"Saved to: {filename}")
 
 if __name__ == "__main__":
     topic = input("Enter a research topic: ")
-    run_agent(topic)
+    run(topic)
