@@ -7,6 +7,7 @@ from agents.researcher import run_researcher
 from agents.synthesizer import run_synthesizer
 from eval import evaluate_report
 from memory import save_to_memory, get_relevant_memory
+from concurrent.futures import ThreadPoolExecutor
 
 load_dotenv()
 
@@ -59,10 +60,11 @@ def run(topic: str):
     tasks = run_planner(topic_with_context, llm)
 
     # Step 2 — Researchers run in sequence
-    findings = []
-    for task in tasks:
-        finding = run_researcher(task, llm)
-        findings.append(finding)
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        findings = list(executor.map(
+        lambda task: run_researcher(task, llm),
+        tasks
+    ))
 
     # Step 3 — Synthesizer combines findings
     report = run_synthesizer(topic, findings, llm)
